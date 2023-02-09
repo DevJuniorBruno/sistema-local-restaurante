@@ -1,0 +1,27 @@
+import prismaClient from "../../prisma";
+
+interface ItemRequest{
+    order_id: string;
+    amount: number;
+    product_id:string;
+}
+
+class AddItemService{
+    async execute({ order_id, product_id, amount}: ItemRequest) {
+
+        const order = await prismaClient.item.create({
+         
+            data:{
+                amount:amount,
+                order_id:order_id,
+                product_id:product_id
+            }
+
+        })
+
+        return order; 
+
+    }
+}
+
+export { AddItemService }
