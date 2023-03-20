@@ -23,18 +23,22 @@ export default function Home() {
   
   async function handleLogin(event: FormEvent){
     event.preventDefault();
+
+    if(email === "" || password === ""){
+      alert("PREENCHA OS DADOS")
+      return;
+    }
     
+    setLoading(true);
+
     let data = {
       email,
       password
     }
 
     await signIn(data)
+    setLoading(false);
   }
-
-
-
-
 
   return (
     <div>
@@ -60,8 +64,7 @@ export default function Home() {
 
          <Button
          type='submit'
-         Loading={false}
-         onChange={(e) => setLoading(true) }
+         Loading={loading}
          >
           Login
          </Button>
