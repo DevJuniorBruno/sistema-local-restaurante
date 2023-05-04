@@ -6,11 +6,14 @@ import Image from 'next/image';
 import {Input} from '../components/ui/Input'
 import { Button } from '../components/ui/Button';
 import Link from 'next/link';
+import { toast } from 'react-toastify'
 
 import { AuthContext} from '../contexts/AuthContext';
 
 import logoImg from '../../public/logo.svg';
 import { FormEvent } from 'react';
+
+import { canSSRGuest } from '../utils/canSSRGuest';
 
 export default function Home() {
 
@@ -25,7 +28,7 @@ export default function Home() {
     event.preventDefault();
 
     if(email === "" || password === ""){
-      alert("PREENCHA OS DADOS")
+        toast.error("Preencha todos os campos!")
       return;
     }
     
@@ -78,3 +81,12 @@ export default function Home() {
     </div>
   )
 }
+
+
+export const getServerSideProps = canSSRGuest(async (ctx) =>{
+
+  return {
+    props:{}
+  }
+
+})

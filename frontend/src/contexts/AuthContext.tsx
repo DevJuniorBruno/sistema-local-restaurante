@@ -1,9 +1,11 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useState, useEffect } from "react";
 
 import { api } from "@/services/apiClient";
 
 import { destroyCookie, setCookie, parseCookies} from 'nookies';
 import Router from 'next/router';
+
+import { toast} from 'react-toastify';
 
 type AuthContextData = {
     user: UserProps;
@@ -12,6 +14,8 @@ type AuthContextData = {
     signOut : () => void;
     signUp : (credentials: SignUpProps)=> Promise<void>;
 }
+
+
 
 type UserProps = {
     id:string;
@@ -50,6 +54,32 @@ export function AuthProvider({children}: AuthProviderProps){
     const [user, setUser] = useState<UserProps>();
     const isAuthenticated = !!user; //controla o login| !!vira boolean
 
+
+    useEffect(()=>{
+        const { "@nextauth.token": token} = parseCookies()
+
+        if(token){
+            api.get("/me").then(response=>{
+                const { id, name, email} = response.data
+
+                setUser({
+                    id,
+                    name,
+                    email
+                })
+            })
+            .catch(()=>{
+                //if !token || .then nao existir response
+
+                signOut()
+
+            })
+        }
+    },[])
+
+  
+   
+
    async function signIn({email, password}: SignInProps){
   try{
     const response = await api.post('/session', {
@@ -72,11 +102,16 @@ export function AuthProvider({children}: AuthProviderProps){
 
     api.defaults.headers['autorization'] = `Bearer ${token}`
 
+    toast.success("Logado com sucesso!");
+
     Router.push("/dashboard");
+
+
 
 
   }catch(err){
     console.log("Erro ao fazer o login ", err )
+    toast.error("Erro ao logar.")
   }
 }
 
@@ -88,6 +123,8 @@ export function AuthProvider({children}: AuthProviderProps){
                 password
             })
 
+            toast.success("Conta criada com sucesso!")
+
 
     Router.push("/")
 
@@ -95,6 +132,8 @@ export function AuthProvider({children}: AuthProviderProps){
             console.log("erro ao cadastrar usuario")
         }
     }
+
+   
     
     return(
         <AuthContext.Provider value={{user, isAuthenticated, signIn, signOut, signUp}}>
